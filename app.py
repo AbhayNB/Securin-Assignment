@@ -6,6 +6,8 @@ import requests
 import logging
 import yaml
 import json
+import os
+api_key = os.getenv('api_key')
 # Flask app setup
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cve.db'
@@ -36,7 +38,7 @@ def fetch_cves(start_index=0, results_per_page=2):
         "resultsPerPage": results_per_page
     }
     headers = {
-        "apiKey": "d99a6fcc-3f60-4dd7-ae63-2d5c8a4388b4"  # Replace with your API key
+        "apiKey": api_key  # Replace with your API key
     }
 
     logger.info(f"Fetching CVEs: start_index={start_index}, results_per_page={results_per_page}")
