@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVE Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>CVE Dashboard</h1>
+            <p>Designed By Abhay Bairagi</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="cve-list">
+            <table class="cve-table">
+                <thead>
+                    <tr>
+                        <th>CVE ID</th>
+                        <th>Published</th>
+                        <th>Last Modified</th>
+                        <th>Status</th>
+                        <th>Base Score (v3)</th>
+                    </tr>
+                </thead>
+                <tbody id="cve-table-body"></tbody>
+            </table>
+
+            <div class="pagination">
+                <div class="results-per-page">
+                    <span>Results per page:</span>
+                    <select id="results-per-page">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="prev-page" disabled>Previous</button>
+                    <span id="page-info"></span>
+                    <button id="next-page">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let resultsPerPage = 10;
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    async function loadCVEs() {
+        try {
+            const response = await fetch(`/api/cves?page=${currentPage}&per_page=${resultsPerPage}`);
+            const data = await response.json();
+            
+            const tableBody = document.getElementById('cve-table-body');
+            tableBody.innerHTML = '';
+            
+            data.cves.forEach(cve => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cve.id}</td>
+                    <td>${formatDate(cve.published)}</td>
+                    <td>${formatDate(cve.last_modified)}</td>
+                    <td>${cve.vuln_status}</td>
+                    <td>${cve.base_score_v3 || 'N/A'}</td>
+                `;
+                row.addEventListener('click', () => {
+                    window.location.href = `/cves/${cve.id}`;
+                });
+                tableBody.appendChild(row);
+            });
+
+            totalPages = data.pages;
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        } catch (error) {
+            console.error('Error loading CVEs:', error);
+        }
+    }
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadCVEs();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadCVEs();
+        }
+    });
+
+    document.getElementById('results-per-page').addEventListener('change', (e) => {
+        resultsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        loadCVEs();
+    });
+
+    // Initial load
+    loadCVEs();
+</script>
+</body>
+</html>

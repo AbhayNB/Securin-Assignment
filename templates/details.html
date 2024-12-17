@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVE Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+          }
+    </style>
+       
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>CVE Details for {{ cvename }}</h1>
+            <p>Designed By Abhay Bairagi</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="cve-details">
+            <p>Loading CVE details...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadCVEDetails() {
+            const cveId = "{{ cvename }}";
+            try {
+                const response = await fetch(`/api/cves/${cveId}`);
+                const cve = await response.json();
+                
+                const detailsDiv = document.getElementById('cve-details');
+                detailsDiv.innerHTML = `
+                    <h2>${cve.id}</h2>
+                    <p><strong>Description:</strong> ${cve.description}</p>
+                    <p><strong>Published:</strong> ${new Date(cve.published).toLocaleDateString()}</p>
+                    <p><strong>Last Modified:</strong> ${new Date(cve.last_modified).toLocaleDateString()}</p>
+                    <p><strong>Vulnerability Status:</strong> ${cve.vuln_status}</p>
+                    <p><strong>Source Identifier:</strong> ${cve.source_identifier}</p>
+                    <p><strong>CVSS v2 Severity:</strong> ${cve.severity}</p>
+                    <p><strong>CVSS v2 Score:</strong> ${cve.score}</p>
+                    <p><strong>CVSS v2 Vector String:</strong> ${cve.vector_string}</p>
+                    <p><strong>Access Vector:</strong> ${cve.access_vector}</p>
+                    <p><strong>Access Complexity:</strong> ${cve.access_complexity}</p>
+                    <p><strong>Authentication:</strong> ${cve.authentication}</p>
+                    <p><strong>Confidentiality Impact:</strong> ${cve.confidentiality_impact}</p>
+                    <p><strong>Integrity Impact:</strong> ${cve.integrity_impact}</p>
+                    <p><strong>Availability Impact:</strong> ${cve.availability_impact}</p>
+                    <p><strong>Exploitability Score:</strong> ${cve.exploitability_score}</p>
+                    <p><strong>Impact Score:</strong> ${cve.impact_score}</p>
+                    <h3>CPE Information:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CPE Criteria</th>
+                                <th>CPE Match Criteria ID</th>
+                                <th>CPE Vulnerable</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${cve.cpe_criteria.map((criteria, index) => `
+                            <tr>
+                                <td>${criteria}</td>
+                                <td>${cve.cpe_match_criteria_id[index]}</td>
+                                <td>${cve.cpe_vulnerable[index]}</td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error loading CVE details:', error);
+            }
+        }
+    
+        // Load details on page load
+        loadCVEDetails();
+    </script>
+</body>
+</html>

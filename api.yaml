@@ -1,0 +1,233 @@
+openapi: 3.0.0
+info:
+  title: CVE API
+  version: 1.0.0
+  description: |
+    The CVE API provides access to Common Vulnerabilities and Exposures (CVE) data. 
+    Use the endpoints to fetch CVE details, filter by year, and more.
+servers:
+  - url: http://localhost:5000
+    description: Local server
+paths:
+  /api/cves:
+    get:
+      summary: Fetch all CVEs
+      description: Retrieve a paginated list of CVEs from the database.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page.
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [published, last_modified]
+            default: published
+          description: Field to sort the results by.
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order (ascending or descending).
+      responses:
+        '200':
+          description: A paginated list of CVEs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 100
+                  pages:
+                    type: integer
+                    example: 10
+                  current_page:
+                    type: integer
+                    example: 1
+                  cves:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: CVE-2024-1234
+                        published:
+                          type: string
+                          format: date-time
+                          example: 2024-12-01T00:00:00Z
+                        last_modified:
+                          type: string
+                          format: date-time
+                          example: 2024-12-15T00:00:00Z
+                        vuln_status:
+                          type: string
+                          example: fixed
+                        base_score_v2:
+                          type: number
+                          example: 5.6
+                        base_score_v3:
+                          type: number
+                          example: 7.3
+                        description:
+                          type: string
+                          example: "Sample description of the CVE."
+                        access_vector:
+                          type: string
+                          example: "network"
+                        access_complexity:
+                          type: string
+                          example: "low"
+                        authentication:
+                          type: string
+                          example: "none"
+                        confidentiality_impact:
+                          type: string
+                          example: "high"
+                        integrity_impact:
+                          type: string
+                          example: "low"
+                        availability_impact:
+                          type: string
+                          example: "high"
+  /api/cves/{cve_id}:
+    get:
+      summary: Fetch CVE by ID
+      description: Retrieve detailed information about a specific CVE.
+      parameters:
+        - name: cve_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the CVE.
+      responses:
+        '200':
+          description: A detailed CVE record.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: CVE-2024-1234
+                  source_identifier:
+                    type: string
+                    example: nvd.nist.gov
+                  published:
+                    type: string
+                    format: date-time
+                    example: 2024-12-01T00:00:00Z
+                  last_modified:
+                    type: string
+                    format: date-time
+                    example: 2024-12-15T00:00:00Z
+                  vuln_status:
+                    type: string
+                    example: fixed
+                  description:
+                    type: string
+                    example: "This is a sample description of the vulnerability."
+                  base_score_v2:
+                    type: number
+                    example: 5.6
+                  base_score_v3:
+                    type: number
+                    example: 7.3
+                  access_vector:
+                    type: string
+                    example: "network"
+                  access_complexity:
+                    type: string
+                    example: "low"
+                  authentication:
+                    type: string
+                    example: "none"
+                  confidentiality_impact:
+                    type: string
+                    example: "high"
+                  integrity_impact:
+                    type: string
+                    example: "low"
+                  availability_impact:
+                    type: string
+                    example: "high"
+                  exploitability_score:
+                    type: number
+                    example: 8.5
+                  impact_score:
+                    type: number
+                    example: 6.7
+                  cpe_criteria:
+                    type: array
+                    items:
+                      type: string
+                      example: "cpe:/a:apache:http_server:2.4.48"
+                  cpe_match_criteria_id:
+                    type: array
+                    items:
+                      type: string
+                      example: "cpe_match_1"
+                  cpe_vulnerable:
+                    type: array
+                    items:
+                      type: boolean
+                      example: true
+  /api/cves/year/{year}:
+    get:
+      summary: Fetch CVEs by year
+      description: Retrieve all CVEs published in a specific year.
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The year to filter CVEs by.
+      responses:
+        '200':
+          description: A list of CVEs published in the given year.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: CVE-2024-1234
+                    published:
+                      type: string
+                      format: date-time
+                      example: 2024-12-01T00:00:00Z
+                    base_score_v2:
+                      type: number
+                      example: 5.6
+                    base_score_v3:
+                      type: number
+                      example: 7.3
+                    vuln_status:
+                      type: string
+                      example: fixed
+                    description:
+                      type: string
+                      example: "Sample description for the CVE."
